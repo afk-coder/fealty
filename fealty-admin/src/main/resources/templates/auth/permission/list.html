@@ -1,0 +1,202 @@
+﻿<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+	<meta http-equiv="Cache-Control" content="no-siteapp"/>
+	<!--[if lt IE 9]>
+	<script type="text/javascript" src="/static/html5shiv.js"></script>
+	<script type="text/javascript" src="/static/respond.min.js"></script>
+	<![endif]-->
+	<link rel="stylesheet" type="text/css" href="/static/bootstrap/3.3.7/css/bootstrap.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/bootstrap-table/1.12.1/css/bootstrap-table.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui/css/H-ui.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui.admin/css/H-ui.admin.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/Hui-iconfont/1.0.8/iconfont.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui.admin/skin/default/skin.css" id="skin"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui.admin/css/style.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/jquery.treegrid/css/jquery.treegrid.css"/>
+	<!--[if IE 6]>
+	<script type="text/javascript" src="/static/DD_belatedPNG_0.0.8a-min.js"></script>
+	<script>DD_belatedPNG.fix('*');</script>
+	<![endif]-->
+	<title>权限管理</title>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 管理员管理 <span class="c-gray en">&gt;</span> 权限管理 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	<div class="text-c" id="query">
+		权限名称:
+		<input type="text" class="input-text" style="width:250px" placeholder="权限名称" id="name" name="name">
+		<button type="button" class="btn btn-success" id="btn" ><i class="Hui-iconfont">&#xe665;</i> 搜索</button>
+	</div>
+	<div class="cl pd-5 bg-1 bk-gray mt-20"> <span class="l"><a href="javascript:;" onclick="add('添加菜单', '', '')" class="btn btn-primary radius"><i class="Hui-iconfont">&#xe600;</i> 新增菜单</a></span> </div>
+	<div class="mt-20">
+		<span class="c-red">注：不勾选为一级菜单</span>
+		<table id="table" >
+		</table>
+	</div>
+</div>
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="/static/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="/static/h-ui/js/H-ui.min.js"></script>
+<script type="text/javascript" src="/static/h-ui.admin/js/H-ui.admin.js"></script> <!--/_footer 作为公共模版分离出去-->
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/static/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap-table/1.12.1/js/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap-table/1.12.1/locale/bootstrap-table-zh-CN.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap-table/1.12.1/extensions/bootstrap-table-treegrid.min.js"></script>
+<script type="text/javascript" src="/static/jquery.treegrid/js/jquery.treegrid.min.js"></script>
+<script type="text/javascript">
+    var url = '/permission/list';
+    $(document).ready(function () {
+        $('#table').bootstrapTable({
+            url: url,
+            method: 'post',
+            striped: true,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            sortable: true,                     //是否启用排序
+            sortOrder: "asc",                   //排序方式
+            clickToSelect: true,                //是否启用点击选中行
+            uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+            cardView: false,                    //是否显示详细视图
+            detailView: false,                   //是否显示父子表
+            contentType: "application/x-www-form-urlencoded",
+            queryParamsType: '',
+            queryParams: queryParams,
+            singleSelect: true,					//禁止多选
+            columns: [
+                {
+                    field : 'checked',
+                    checkbox : true,
+                    align: 'center',
+                    width: '3%'
+				},{
+                    title: '序号',
+                    width: '4%',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return index + 1;
+                    }
+                },
+                {
+                    field: 'name',
+                    title: '名称'
+                }, {
+                    field: 'permission',
+                    title: '权限',
+                    width: '15%'
+                }, {
+                    field: 'url',
+                    title: '访问地址',
+                    width: '15%'
+                }, {
+                    field: 'type',
+                    title: '类型',
+                    width: '10%',
+					formatter: function (value, row, index) {
+						if(value == 'menu') {
+						    return '菜单';
+						}
+						if(value == 'button') {
+						    return '按钮';
+						}
+						return '';
+                    }
+                }, {
+                    field: 'available',
+                    title: '是否启用',
+                    width: '10%',
+                    formatter: function (value, row, index) {
+                        if(value) {
+                            return '<span class="label label-success radius">已启用</span>'
+						} else {
+                            return '<span class="label label-defaunt radius">已停用</span>'
+						}
+                    }
+                }, {
+					field: 'reorder',
+					title: '排序',
+					width: '5%'
+				}, {
+                    field: 'id',
+                    title: '操作',
+                    width: '10%',
+                    formatter: function (value, row, index) {
+						return '<a title="编辑" href="javascript:;" onclick="add(\'修改菜单\',\'' + value + '\', \'' + row.parentId + '\')" class="btn btn-primary size-MINI radius" style="text-decoration:none"><i class="Hui-iconfont">&#xe6df;</i></a>  ' +
+                            '<a title="删除" href="javascript:;" onclick="del(\'' + value + '\')" class="btn btn-danger size-MINI radius" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>';
+                    }
+                }
+            ],
+            treeShowField: 'name',
+            parentIdField: 'parentId',
+            onLoadSuccess: function(data) {
+                $('#table').treegrid({
+                    initialState: 'collapsed',//收缩
+                    treeColumn: 2,//指明第几列数据改为树形
+                    expanderExpandedClass: 'glyphicon glyphicon-triangle-bottom',
+                    expanderCollapsedClass: 'glyphicon glyphicon-triangle-right',
+                    onChange: function() {
+                        $('#table').bootstrapTable('resetWidth');
+                    }
+                });
+            }
+        });
+    });
+
+    function queryParams(params) {
+        params.s = {};
+        $('#query').find('*[name]').each(function() {
+            var value = $.trim($(this).val());
+            var name = $.trim($(this).attr('name'));
+            if(name && value){
+                params.s[$(this).attr('name')] = value;
+            }
+        });
+        return params;
+    }
+
+	function add(title, id, parentId){
+        if(id == '') {
+			//获取勾选
+            var rows = $('#table').bootstrapTable('getSelections');
+            parentId = 0;
+            if(typeof(rows[0]) != 'undefined') {
+                parentId = rows[0].id;
+            }
+		}
+        layer_show(title,'/permission/add?id='+id+'&parentId='+parentId,'', 430);
+	}
+
+	//删除
+	function del(id){
+		layer.confirm('确认要删除吗？',function(index){
+			$.ajax({
+				type: 'POST',
+				url: '/permission/delete?id='+id,
+				dataType: 'json',
+				success: function(data){
+				    if(data.success) {
+                        layer.msg(data.descr, {icon: 1, time: 1000});
+                        refresh();
+					} else {
+                        layer.msg(data.descr, {icon: 2, time: 1000});
+					}
+
+				},
+				error:function(data) {
+                    layer.msg('删除失败!', {icon: 2, time: 1000});
+				},
+			});
+		});
+	}
+    function refresh() {
+        $('#table').bootstrapTable('refresh', {url: url});
+    }
+</script>
+</body>
+</html>

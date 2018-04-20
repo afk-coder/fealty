@@ -1,0 +1,85 @@
+﻿<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+	<meta http-equiv="Cache-Control" content="no-siteapp"/>
+	<!--[if lt IE 9]>
+	<script type="text/javascript" src="/static/html5shiv.js"></script>
+	<script type="text/javascript" src="/static/respond.min.js"></script>
+	<![endif]-->
+	<link rel="stylesheet" type="text/css" href="/static/bootstrap/3.3.7/css/bootstrap.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/bootstrap-table/1.12.1/css/bootstrap-table.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui/css/H-ui.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui.admin/css/H-ui.admin.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/Hui-iconfont/1.0.8/iconfont.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui.admin/skin/default/skin.css" id="skin"/>
+	<link rel="stylesheet" type="text/css" href="/static/h-ui.admin/css/style.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/zTree/v3/css/zTreeStyle/zTreeStyle.css"/>
+	<!--[if IE 6]>
+	<script type="text/javascript" src="/static/DD_belatedPNG_0.0.8a-min.js"></script>
+	<script>DD_belatedPNG.fix('*');</script>
+	<![endif]-->
+	<title>角色授权</title>
+</head>
+<body>
+<div class="page-container">
+	<input type="hidden" id="roleId" th:value="${roleId}" />
+	<button type="button" class="btn btn-primary size-S radius" id="save"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+	<ul id="tree" class="ztree"></ul>
+</div>
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="/static/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="/static/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="/static/h-ui/js/H-ui.min.js"></script>
+<script type="text/javascript" src="/static/h-ui.admin/js/H-ui.admin.js"></script>
+<!--/_footer 作为公共模版分离出去-->
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/static/zTree/v3/js/jquery.ztree.core-3.5.min.js"></script>
+<script type="text/javascript" src="/static/zTree/v3/js/jquery.ztree.excheck-3.5.min.js"></script>
+<script type="text/javascript" src="/static/fealty/admin/base.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        getMenuData();
+        //保存
+		$('#save').click(function () {
+		    //获取所有选中
+            var zTreeObj = $.fn.zTree.getZTreeObj("tree");
+            var nodes = zTreeObj.getCheckedNodes(true);
+            var ids = [];
+            for (var i = 0; i < nodes.length; i++) {
+                var obj = nodes[i];
+				ids.push(obj.id);
+            }
+            $.ajax({
+                url: '/role/grant',
+                data: {'roleId': $('#roleId').val(), 'ids': JSON.stringify(ids)},
+                type: "post",
+                success: function (data) {
+                    if(data.success) {
+                        parent.layer.msg(data.descr, {icon: 1, time: 1000});
+                        layer_close();
+                    } else {
+                        parent.layer.msg(data.descr, {icon: 2, time: 1000});
+                    }
+                }
+            });
+        });
+    });
+    function getMenuData() {
+        $.ajax({
+            url: '/role/getData',
+            data: {'roleId': $('#roleId').val()},
+            type: "post",
+            async: false,
+            success: function (data) {
+                $.fn.zTree.init($("#tree"), setting, data);
+            }
+        });
+    }
+</script>
+</body>
+</html>
